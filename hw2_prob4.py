@@ -24,12 +24,6 @@ Future_customers = []
 #list of total customers serviced
 Customers_serviced = []
 
-####
-mean_rhos = []
-mean_ws = []
-mean_qs = []
-mean_Tqs = []
-mean_Tws = []
 #generates exponential variate based on a poisson distribution
 #this makes an IAT based on number of requests/time (poisson lambda)
 def exp_generator(lambd): 
@@ -41,7 +35,6 @@ def mu(Ts):
 def initialize_list(n, lambd):
     for i in range(n):
         Future_customers.append(exp_generator(lambd))
-    return
 
 #generates the next customer to enter the system, using the list of future_cstomers
 def reset():
@@ -58,9 +51,7 @@ def birth(Ts):
         arrival_time = IAT + Customers_serviced[-1].arrival_time
         service_start_time = max(Customers_serviced[-1].service_end_time, arrival_time)
     return Customer(arrival_time, service_start_time, service_time)
-
-#customer leaves system; just add customer data to customers_serviced list
-        
+   
 def death(customer):
     Customers_serviced.append(customer)
     return
@@ -76,9 +67,8 @@ def simulate(lambd, Ts, max_time):
         time = customer.arrival_time
         #keep track of all customers in system
 
-    #print("Statistics:\n")
-    ##################################################
-
+    print("Statistics:")
+    print("-----------------------------------")
     total_time = [c.time_in_system for c in Customers_serviced]
     total_mean_time = sum(total_time)/len(total_time)
     service_times = [c.service_time for c in Customers_serviced]
@@ -87,26 +77,18 @@ def simulate(lambd, Ts, max_time):
     avg_wait = sum(wait_times)/len(wait_times)
     q = util/(1-util)
     w = util**2/(1-util)
-    
-    mean_rhos.append(util)
-    mean_ws.append(w)
-    mean_qs.append(q)
-    mean_Tqs.append(total_mean_time)
-    mean_Tws.append(avg_wait)
-    #########################
-    #print("ρ: ", util)
-    #print("w: ", w)
-    #print("q: ", q)
-    #print("Tq: ", total_mean_time)
-    #print("Tw: ", avg_wait)
-    #print("Ts :", avg_service)
-    #print()
-    
 
-    ##################################################
+    print("ρ: ", util)
+    print("w: ", w)
+    print("q: ", q)
+    print("Tq: ", total_mean_time)
+    print("Tw: ", avg_wait)
+    print("Ts :", sum(service_times)/len(Customers_serviced))
+    print()
+    
     """Comment out this part of code if you want to run
     a ton of simulations for CLT purposes"""
-    if input("Export data to csv (True/False)?"):
+    if input("Export data to csv (Y/N)? ") == 'Y':
         export_data(lambd, Ts, max_time)
     return
 
@@ -131,23 +113,5 @@ def export_data(lambd, Ts, max_time):
     outfile.close()
     return
 
-def statistics(l):
-    norm_mean = sum(l)/100
-    norm_stdev = stat.stdev(l)
-    error = 1.96 * norm_stdev/math.sqrt(100)
-    #print("N = 100")
-    print("mean: ", norm_mean)
-    print("standard deviation: ", norm_stdev)
-    print("95% confidence interval: ", 
-          float("{0:.3f}".format(norm_mean)), "+-", 
-                float("{0:.3f}".format(error)))
-    return
+simulate(3, 0.20, 100)
 
-simulate(3, 0.20, 2000)
-
-#sim = [simulate(3, 0.20, 2000) for i in range(100)]
-#statistics(mean_rhos)
-#statistics(mean_ws)
-#statistics(mean_qs)
-#statistics(mean_Tqs)
-#statistics(mean_Tws)
